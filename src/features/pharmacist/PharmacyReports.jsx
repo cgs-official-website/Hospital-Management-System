@@ -16,6 +16,8 @@ const PharmacyReports = () => {
   });
 
   const [recentBills, setRecentBills] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -56,7 +58,7 @@ const PharmacyReports = () => {
           lowStockCount: lowStock
         });
 
-        setRecentBills(billsList.sort((a, b) => b.date?.seconds - a.date?.seconds).slice(0, 5));
+        setRecentBills(billsList.sort((a, b) => b.date?.seconds - a.date?.seconds));
       } catch (err) {
         console.error(err);
       } finally {
@@ -139,34 +141,68 @@ const PharmacyReports = () => {
           </h3>
           
           <div className="overflow-x-auto custom-scrollbar w-full">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
-                  <th className="py-3 px-4 font-medium">Bill ID</th>
-                  <th className="py-3 px-4 font-medium">Patient Name</th>
-                  <th className="py-3 px-4 font-medium">Items</th>
-                  <th className="py-3 px-4 font-medium">Date</th>
-                  <th className="py-3 px-4 font-medium text-right">Total Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentBills.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center py-8 text-slate-500">No bills generated yet.</td>
-                  </tr>
-                ) : (
-                  recentBills.map(bill => (
-                    <tr key={bill.id} className="border-b border-slate-100 hover:bg-slate-50">
-                      <td className="py-3 px-4 font-mono text-xs text-slate-500">{bill.id.slice(0, 8)}</td>
-                      <td className="py-3 px-4 font-bold text-slate-800">{bill.patientName}</td>
-                      <td className="py-3 px-4 text-sm text-slate-600">{bill.items?.length || 0} items</td>
-                      <td className="py-3 px-4 text-sm text-slate-600">{new Date(bill.date?.seconds * 1000).toLocaleDateString()}</td>
-                      <td className="py-3 px-4 font-extrabold text-slate-800 text-right">₹{bill.total?.toFixed(2)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            {(() => {
+              const totalPages = Math.ceil(recentBills.length / itemsPerPage);
+              const currentBills = recentBills.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+              
+              return (
+                <>
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
+                        <th className="py-3 px-4 font-medium">Bill ID</th>
+                        <th className="py-3 px-4 font-medium">Patient Name</th>
+                        <th className="py-3 px-4 font-medium">Items</th>
+                        <th className="py-3 px-4 font-medium">Date</th>
+                        <th className="py-3 px-4 font-medium text-right">Total Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentBills.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="text-center py-8 text-slate-500">No bills generated yet.</td>
+                        </tr>
+                      ) : (
+                        currentBills.map(bill => (
+                          <tr key={bill.id} className="border-b border-slate-100 hover:bg-slate-50">
+                            <td className="py-3 px-4 font-mono text-xs text-slate-500">{bill.id.slice(0, 8)}</td>
+                            <td className="py-3 px-4 font-bold text-slate-800">{bill.patientName}</td>
+                            <td className="py-3 px-4 text-sm text-slate-600">{bill.items?.length || 0} items</td>
+                            <td className="py-3 px-4 text-sm text-slate-600">{new Date(bill.date?.seconds * 1000).toLocaleDateString()}</td>
+                            <td className="py-3 px-4 font-extrabold text-slate-800 text-right">₹{bill.total?.toFixed(2)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                  
+                  {/* Pagination */}
+                  {totalPages > 0 && (
+                    <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                      <span className="text-sm font-medium text-slate-500">
+                        Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, recentBills.length)} of {recentBills.length} entries
+                      </span>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                          disabled={currentPage === 1}
+                          className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                        >
+                          Previous
+                        </button>
+                        <button 
+                          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                          disabled={currentPage === totalPages}
+                          className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

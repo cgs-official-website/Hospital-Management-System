@@ -11,6 +11,12 @@ const IPDManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('admitted'); // admitted, discharged, all
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
   
   const hospitalId = localStorage.getItem('hospitalId');
 
@@ -156,86 +162,120 @@ const IPDManagement = () => {
 
         {/* Table */}
         <div className="flex-1 overflow-auto custom-scrollbar border border-slate-200 rounded-2xl bg-white/50">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
-              <tr>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Location</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Admission Details</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center text-slate-500">Loading admissions...</td>
-                </tr>
-              ) : filteredAdmissions.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-12 text-center text-slate-500">
-                    <Bed size={48} className="mx-auto mb-4 text-slate-300" />
-                    <p className="font-bold text-lg">No records found</p>
-                    <p className="text-sm">Click "Admit Patient" to register a new IPD admission.</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredAdmissions.map((record) => (
-                  <tr key={record.id} className="border-b border-slate-100 hover:bg-sky-50/30 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
-                          {record.patientName.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-800">{record.patientName}</p>
-                          <p className="text-xs text-slate-500">ID: {record.patientId || 'N/A'} • {record.age}y {record.gender}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm font-bold text-slate-700 flex items-center gap-1">
-                          <Bed size={14} className="text-slate-400"/> Bed {record.bedNumber}
-                        </span>
-                        <span className="text-xs text-slate-500">{record.department}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-sm text-slate-700 truncate max-w-[200px]" title={record.admissionReason}>
-                          {record.admissionReason}
-                        </span>
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <Stethoscope size={12}/> Dr. {record.attendingDoctor}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className={`text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 w-max ${
-                        record.status === 'admitted' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-                      }`}>
-                        {record.status === 'admitted' ? <Clock size={12} /> : <CheckCircle2 size={12} />}
-                        {record.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {record.status === 'admitted' ? (
-                        <button 
-                          onClick={() => handleDischarge(record.id)}
-                          className="text-xs font-bold bg-white border border-slate-200 hover:border-emerald-300 hover:text-emerald-600 text-slate-600 px-3 py-2 rounded-lg transition-all shadow-sm"
-                        >
-                          Discharge Patient
-                        </button>
-                      ) : (
-                        <span className="text-xs font-bold text-slate-400">Discharged</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          {(() => {
+            const totalPages = Math.ceil(filteredAdmissions.length / itemsPerPage);
+            const currentAdmissions = filteredAdmissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            
+            return (
+              <>
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
+                    <tr>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Location</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Admission Details</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="p-8 text-center text-slate-500">Loading admissions...</td>
+                      </tr>
+                    ) : filteredAdmissions.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="p-12 text-center text-slate-500">
+                          <Bed size={48} className="mx-auto mb-4 text-slate-300" />
+                          <p className="font-bold text-lg">No records found</p>
+                          <p className="text-sm">Click "Admit Patient" to register a new IPD admission.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentAdmissions.map((record) => (
+                        <tr key={record.id} className="border-b border-slate-100 hover:bg-sky-50/30 transition-colors">
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">
+                                {record.patientName.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-800">{record.patientName}</p>
+                                <p className="text-xs text-slate-500">ID: {record.patientId || 'N/A'} • {record.age}y {record.gender}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-sm font-bold text-slate-700 flex items-center gap-1">
+                                <Bed size={14} className="text-slate-400"/> Bed {record.bedNumber}
+                              </span>
+                              <span className="text-xs text-slate-500">{record.department}</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-sm text-slate-700 truncate max-w-[200px]" title={record.admissionReason}>
+                                {record.admissionReason}
+                              </span>
+                              <span className="text-xs text-slate-500 flex items-center gap-1">
+                                <Stethoscope size={12}/> Dr. {record.attendingDoctor}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className={`text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 w-max ${
+                              record.status === 'admitted' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              {record.status === 'admitted' ? <Clock size={12} /> : <CheckCircle2 size={12} />}
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            {record.status === 'admitted' ? (
+                              <button 
+                                onClick={() => handleDischarge(record.id)}
+                                className="text-xs font-bold bg-white border border-slate-200 hover:border-emerald-300 hover:text-emerald-600 text-slate-600 px-3 py-2 rounded-lg transition-all shadow-sm"
+                              >
+                                Discharge Patient
+                              </button>
+                            ) : (
+                              <span className="text-xs font-bold text-slate-400">Discharged</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+                
+                {/* Pagination */}
+                {totalPages > 0 && (
+                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                    <span className="text-sm font-medium text-slate-500">
+                      Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAdmissions.length)} of {filteredAdmissions.length} entries
+                    </span>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                      >
+                        Previous
+                      </button>
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 

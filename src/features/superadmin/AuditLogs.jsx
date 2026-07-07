@@ -9,8 +9,12 @@ const AuditLogs = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
   useEffect(() => {
     // In production, fetch real logs
     const q = query(collection(db, 'audit_logs'), limit(50));
@@ -27,6 +31,9 @@ const AuditLogs = () => {
     const matchesSearch = log.action.toLowerCase().includes(searchTerm.toLowerCase()) || log.user.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const currentLogs = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const getSeverityStyles = (severity) => {
     switch (severity) {
@@ -95,7 +102,7 @@ const AuditLogs = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredLogs.map((log, idx) => (
+              {currentLogs.map((log, idx) => (
                 <motion.tr 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -120,11 +127,25 @@ const AuditLogs = () => {
             <div className="p-12 text-center text-slate-500">No logs found matching criteria.</div>
           )}
         </div>
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-sm text-slate-500">
-          <p>Showing {filteredLogs.length} events</p>
-          <button className="flex items-center gap-2 text-primary font-bold hover:text-sky-700 transition-colors">
-            Export Logs to CSV
-          </button>
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-center text-sm text-slate-500 gap-4">
+          <span>Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredLogs.length)} of {filteredLogs.length} events</span>
+          
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-slate-200 rounded-lg bg-white disabled:opacity-50 hover:bg-slate-100 transition-colors"
+            >
+              Previous
+            </button>
+            <button 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-3 py-1 border border-slate-200 rounded-lg bg-white disabled:opacity-50 hover:bg-slate-100 transition-colors"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

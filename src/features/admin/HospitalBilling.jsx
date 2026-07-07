@@ -11,6 +11,12 @@ const HospitalBilling = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('unpaid'); // unpaid, paid, all
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus]);
   
   const hospitalId = localStorage.getItem('hospitalId');
 
@@ -151,79 +157,113 @@ const HospitalBilling = () => {
 
         {/* List */}
         <div className="flex-1 overflow-auto custom-scrollbar border border-slate-200 rounded-2xl bg-white/50">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
-              <tr>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient Details</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Bill Summary</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Amount</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
-                <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="p-8 text-center text-slate-500">Loading invoices...</td>
-                </tr>
-              ) : filteredInvoices.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="p-12 text-center text-slate-500">
-                    <CreditCard size={48} className="mx-auto mb-4 text-slate-300" />
-                    <p className="font-bold text-lg">No invoices found</p>
-                    <p className="text-sm">Click "Generate Invoice" to bill a patient.</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="border-b border-slate-100 hover:bg-sky-50/30 transition-colors">
-                    <td className="p-4">
-                      <div>
-                        <p className="font-bold text-slate-800">{inv.patientName}</p>
-                        <p className="text-xs text-slate-500">ID: {inv.patientId || 'Walk-in'} • {new Date(inv.date?.toDate()).toLocaleDateString()}</p>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div>
-                        <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{inv.type}</span>
-                        <p className="text-sm text-slate-500 mt-1 truncate max-w-[200px]" title={inv.description}>{inv.description}</p>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <p className="font-extrabold text-slate-800 flex items-center text-lg">
-                        <IndianRupee size={16} className="text-slate-400 mr-0.5" />
-                        {inv.amount?.toLocaleString()}
-                      </p>
-                    </td>
-                    <td className="p-4">
-                      <span className={`text-xs font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider ${
-                        inv.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {inv.status}
-                      </span>
-                      {inv.status === 'paid' && <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Via {inv.paymentMethod}</p>}
-                    </td>
-                    <td className="p-4 text-right">
-                      {inv.status === 'unpaid' ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => markAsPaid(inv.id, 'Cash')} className="text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-2 rounded-lg transition-colors border border-emerald-200">
-                            Cash
-                          </button>
-                          <button onClick={() => markAsPaid(inv.id, 'Card/UPI')} className="text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg transition-colors border border-indigo-200">
-                            Card/UPI
-                          </button>
-                        </div>
-                      ) : (
-                        <button className="text-sm font-bold text-slate-500 hover:text-primary transition-colors flex items-center justify-end gap-1 w-full">
-                          <Printer size={16}/> Print Receipt
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          {(() => {
+            const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
+            const currentInvoices = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            
+            return (
+              <>
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
+                    <tr>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient Details</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Bill Summary</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Amount</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
+                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="5" className="p-8 text-center text-slate-500">Loading invoices...</td>
+                      </tr>
+                    ) : filteredInvoices.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="p-12 text-center text-slate-500">
+                          <CreditCard size={48} className="mx-auto mb-4 text-slate-300" />
+                          <p className="font-bold text-lg">No invoices found</p>
+                          <p className="text-sm">Click "Generate Invoice" to bill a patient.</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      currentInvoices.map((inv) => (
+                        <tr key={inv.id} className="border-b border-slate-100 hover:bg-sky-50/30 transition-colors">
+                          <td className="p-4">
+                            <div>
+                              <p className="font-bold text-slate-800">{inv.patientName}</p>
+                              <p className="text-xs text-slate-500">ID: {inv.patientId || 'Walk-in'} • {new Date(inv.date?.toDate()).toLocaleDateString()}</p>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <div>
+                              <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{inv.type}</span>
+                              <p className="text-sm text-slate-500 mt-1 truncate max-w-[200px]" title={inv.description}>{inv.description}</p>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <p className="font-extrabold text-slate-800 flex items-center text-lg">
+                              <IndianRupee size={16} className="text-slate-400 mr-0.5" />
+                              {inv.amount?.toLocaleString()}
+                            </p>
+                          </td>
+                          <td className="p-4">
+                            <span className={`text-xs font-bold px-3 py-1.5 rounded-xl uppercase tracking-wider ${
+                              inv.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {inv.status}
+                            </span>
+                            {inv.status === 'paid' && <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold">Via {inv.paymentMethod}</p>}
+                          </td>
+                          <td className="p-4 text-right">
+                            {inv.status === 'unpaid' ? (
+                              <div className="flex items-center justify-end gap-2">
+                                <button onClick={() => markAsPaid(inv.id, 'Cash')} className="text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-3 py-2 rounded-lg transition-colors border border-emerald-200">
+                                  Cash
+                                </button>
+                                <button onClick={() => markAsPaid(inv.id, 'Card/UPI')} className="text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-3 py-2 rounded-lg transition-colors border border-indigo-200">
+                                  Card/UPI
+                                </button>
+                              </div>
+                            ) : (
+                              <button className="text-sm font-bold text-slate-500 hover:text-primary transition-colors flex items-center justify-end gap-1 w-full">
+                                <Printer size={16}/> Print Receipt
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+                
+                {/* Pagination */}
+                {totalPages > 0 && (
+                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                    <span className="text-sm font-medium text-slate-500">
+                      Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredInvoices.length)} of {filteredInvoices.length} entries
+                    </span>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                      >
+                        Previous
+                      </button>
+                      <button 
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 

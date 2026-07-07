@@ -4,14 +4,14 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC9d_wFrGOc6VQsP2aKC5CgLrykHeS1iog",
-  authDomain: "clinical-management-syst-c698d.firebaseapp.com",
-  databaseURL: "https://clinical-management-syst-c698d-default-rtdb.firebaseio.com",
-  projectId: "clinical-management-syst-c698d",
-  storageBucket: "clinical-management-syst-c698d.firebasestorage.app",
-  messagingSenderId: "499377443630",
-  appId: "1:499377443630:web:a5563be77ad1412a7d60bf",
-  measurementId: "G-VT2DWZYTNR"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);

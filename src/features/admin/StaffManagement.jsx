@@ -77,8 +77,11 @@ const StaffManagement = () => {
   };
 
   const filteredStaff = staff.filter(s => {
-    const matchesSearch = (s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || '') || 
-                          (s.email?.toLowerCase().includes(searchTerm.toLowerCase()) || '');
+    const searchLower = searchTerm.toLowerCase();
+    const nameStr = s.name || '';
+    const emailStr = s.email || '';
+    const matchesSearch = nameStr.toLowerCase().includes(searchLower) || 
+                          emailStr.toLowerCase().includes(searchLower);
     const matchesRole = roleFilter === 'all' || s.role === roleFilter;
     return matchesSearch && matchesRole;
   });

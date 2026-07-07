@@ -10,6 +10,12 @@ const ADTManagement = () => {
   const [admissions, setAdmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
   
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -95,63 +101,97 @@ const ADTManagement = () => {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar -mx-6 px-6">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
-            <tr>
-              <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient</th>
-              <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Current Location</th>
-              <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Doctor & Reason</th>
-              <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
-              <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="5" className="p-8 text-center text-slate-500">Loading...</td></tr>
-            ) : filteredAdmissions.length === 0 ? (
-              <tr><td colSpan="5" className="p-8 text-center text-slate-500">No active admissions found.</td></tr>
-            ) : (
-              filteredAdmissions.map((record) => (
-                <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50">
-                  <td className="p-4">
-                    <p className="font-bold text-slate-800">{record.patientName}</p>
-                    <p className="text-xs text-slate-500">{record.age}y {record.gender} • ID: {record.patientId || 'N/A'}</p>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <Bed size={16} className="text-primary"/>
-                      <div>
-                        <p className="font-bold text-slate-700">Bed {record.bedNumber}</p>
-                        <p className="text-xs text-slate-500">{record.department}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <p className="text-sm font-medium text-slate-700 max-w-[200px] truncate" title={record.admissionReason}>{record.admissionReason}</p>
-                    <p className="text-xs text-slate-500">Dr. {record.attendingDoctor}</p>
-                  </td>
-                  <td className="p-4">
-                    {record.dischargeRequested ? (
-                      <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">Discharge Pending</span>
-                    ) : (
-                      <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Admitted</span>
-                    )}
-                  </td>
-                  <td className="p-4 text-right flex justify-end gap-2">
-                    <button onClick={() => handleOpenTransfer(record)} className="p-2 text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors" title="Transfer Bed/Ward">
-                      <ArrowRightLeft size={16} />
+        {(() => {
+          const totalPages = Math.ceil(filteredAdmissions.length / itemsPerPage);
+          const currentAdmissions = filteredAdmissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+          
+          return (
+            <>
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
+                  <tr>
+                    <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient</th>
+                    <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Current Location</th>
+                    <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Doctor & Reason</th>
+                    <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Status</th>
+                    <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">Loading...</td></tr>
+                  ) : filteredAdmissions.length === 0 ? (
+                    <tr><td colSpan="5" className="p-8 text-center text-slate-500">No active admissions found.</td></tr>
+                  ) : (
+                    currentAdmissions.map((record) => (
+                      <tr key={record.id} className="border-b border-slate-100 hover:bg-slate-50">
+                        <td className="p-4">
+                          <p className="font-bold text-slate-800">{record.patientName}</p>
+                          <p className="text-xs text-slate-500">{record.age}y {record.gender} • ID: {record.patientId || 'N/A'}</p>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <Bed size={16} className="text-primary"/>
+                            <div>
+                              <p className="font-bold text-slate-700">Bed {record.bedNumber}</p>
+                              <p className="text-xs text-slate-500">{record.department}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <p className="text-sm font-medium text-slate-700 max-w-[200px] truncate" title={record.admissionReason}>{record.admissionReason}</p>
+                          <p className="text-xs text-slate-500">Dr. {record.attendingDoctor}</p>
+                        </td>
+                        <td className="p-4">
+                          {record.dischargeRequested ? (
+                            <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">Discharge Pending</span>
+                          ) : (
+                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Admitted</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-right flex justify-end gap-2">
+                          <button onClick={() => handleOpenTransfer(record)} className="p-2 text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-lg transition-colors" title="Transfer Bed/Ward">
+                            <ArrowRightLeft size={16} />
+                          </button>
+                          {!record.dischargeRequested && (
+                            <button onClick={() => handleDischargeRequest(record.id)} className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors" title="Request Discharge">
+                              <LogOut size={16} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+              
+              {/* Pagination */}
+              {totalPages > 0 && (
+                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                  <span className="text-sm font-medium text-slate-500">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAdmissions.length)} of {filteredAdmissions.length} entries
+                  </span>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                    >
+                      Previous
                     </button>
-                    {!record.dischargeRequested && (
-                      <button onClick={() => handleDischargeRequest(record.id)} className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors" title="Request Discharge">
-                        <LogOut size={16} />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-100 hover:text-primary transition-colors disabled:hover:text-slate-600 disabled:hover:bg-transparent"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
 
       <Modal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} title="Transfer Patient">

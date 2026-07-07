@@ -107,7 +107,9 @@ const Dashboard = () => {
   const [moduleSearchQuery, setModuleSearchQuery] = useState('');
   const [showModuleSearch, setShowModuleSearch] = useState(false);
   const [pendingAppointmentsCount, setPendingAppointmentsCount] = useState(0);
-  const [seenPendingCount, setSeenPendingCount] = useState(0);
+  const [seenPendingCount, setSeenPendingCount] = useState(() => {
+    return parseInt(localStorage.getItem('seenPendingCount') || '0', 10);
+  });
 
   useEffect(() => {
     let unsubscribeHospitals = null;
@@ -188,8 +190,10 @@ const Dashboard = () => {
                          
     if (isApptModule) {
       setSeenPendingCount(pendingAppointmentsCount);
+      localStorage.setItem('seenPendingCount', pendingAppointmentsCount);
     } else if (pendingAppointmentsCount < seenPendingCount) {
       setSeenPendingCount(pendingAppointmentsCount);
+      localStorage.setItem('seenPendingCount', pendingAppointmentsCount);
     }
   }, [activeModule, pendingAppointmentsCount, seenPendingCount]);
 
