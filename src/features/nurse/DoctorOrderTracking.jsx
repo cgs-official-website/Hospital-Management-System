@@ -62,8 +62,8 @@ const DoctorOrderTracking = () => {
   }, [hospitalId, patients]);
 
   const filteredOrders = orders.filter(o => 
-    o.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    o.doctorName?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((o.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) ||
+    ((o.doctorName || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

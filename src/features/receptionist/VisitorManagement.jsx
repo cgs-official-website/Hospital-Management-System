@@ -92,8 +92,8 @@ const VisitorManagement = () => {
   };
 
   const filteredVisitors = visitors.filter(v => 
-    v.visitorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.patientName?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((v.visitorName || "").toLowerCase().includes(searchTerm.toLowerCase())) ||
+    ((v.patientName || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

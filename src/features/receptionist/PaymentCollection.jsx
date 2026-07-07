@@ -74,7 +74,7 @@ const PaymentCollection = () => {
   };
 
   const filteredBills = bills.filter(b => 
-    b.patientName?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((b.patientName || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const pendingTotal = bills.filter(b => b.status === 'Pending').reduce((sum, b) => sum + (b.amount || 0), 0);

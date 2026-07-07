@@ -38,7 +38,7 @@ const PatientLookup = () => {
   };
 
   const filteredPatients = patients.filter(p => 
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ((p.name || "").toLowerCase().includes(searchTerm.toLowerCase())) ||
     p.contact?.includes(searchTerm)
   );
 

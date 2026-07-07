@@ -212,11 +212,11 @@ const Appointments = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Date</label>
-              <input required type="date" className="input-field" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+              <input required type="date" className="input-field" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} min={new Date().toISOString().split('T')[0]} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Time</label>
-              <input required type="time" className="input-field" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} />
+              <input required type="time" className="input-field" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} min={formData.date === new Date().toISOString().split('T')[0] ? new Date().toTimeString().substring(0, 5) : undefined} />
             </div>
           </div>
           <div>

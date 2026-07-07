@@ -7,6 +7,7 @@ const GlobalPopup = () => {
   const [popup, setPopup] = useState(null); // { id, message, type, isConfirm, onConfirm }
 
   useEffect(() => {
+    let timer;
     const handleShow = (e) => {
       setPopup({
         id: Date.now(),
@@ -14,6 +15,10 @@ const GlobalPopup = () => {
         type: e.detail.type || 'info',
         isConfirm: false
       });
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        setPopup(null);
+      }, 2500);
     };
 
     const handleConfirm = (e) => {
@@ -24,6 +29,7 @@ const GlobalPopup = () => {
         isConfirm: true,
         onConfirm: e.detail.onConfirm
       });
+      if (timer) clearTimeout(timer);
     };
 
     popupEvent.addEventListener('show', handleShow);
@@ -32,6 +38,7 @@ const GlobalPopup = () => {
     return () => {
       popupEvent.removeEventListener('show', handleShow);
       popupEvent.removeEventListener('confirm', handleConfirm);
+      if (timer) clearTimeout(timer);
     };
   }, []);
 

@@ -125,6 +125,35 @@ const VendorLandingPage = () => {
     );
   }
 
+  const allTimeSlots = [
+    "09:00 AM", "10:00 AM", "11:30 AM", "01:00 PM", 
+    "02:30 PM", "04:00 PM", "05:30 PM"
+  ];
+
+  const getAvailableTimeSlots = () => {
+    const today = new Date().toISOString().split('T')[0];
+    if (formData.date === today) {
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      
+      return allTimeSlots.filter(slot => {
+        const [time, period] = slot.split(' ');
+        let [hours, minutes] = time.split(':').map(Number);
+        
+        if (period === 'PM' && hours !== 12) hours += 12;
+        if (period === 'AM' && hours === 12) hours = 0;
+        
+        if (hours > currentHours) return true;
+        if (hours === currentHours && minutes > currentMinutes) return true;
+        return false;
+      });
+    }
+    return allTimeSlots;
+  };
+
+  const availableTimeSlots = getAvailableTimeSlots();
+
   return (
     <div className="min-h-screen bg-slate-50 relative font-sans overflow-x-hidden pb-20">
       
@@ -261,13 +290,13 @@ const VendorLandingPage = () => {
                     className="input-field pl-12 appearance-none"
                   >
                     <option value="" disabled>Select a time slot</option>
-                    <option value="09:00 AM">09:00 AM</option>
-                    <option value="10:00 AM">10:00 AM</option>
-                    <option value="11:30 AM">11:30 AM</option>
-                    <option value="01:00 PM">01:00 PM</option>
-                    <option value="02:30 PM">02:30 PM</option>
-                    <option value="04:00 PM">04:00 PM</option>
-                    <option value="05:30 PM">05:30 PM</option>
+                    {availableTimeSlots.length > 0 ? (
+                      availableTimeSlots.map(slot => (
+                        <option key={slot} value={slot}>{slot}</option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No more slots available today</option>
+                    )}
                   </select>
                 </div>
               </div>

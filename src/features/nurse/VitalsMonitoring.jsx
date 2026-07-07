@@ -97,7 +97,7 @@ const VitalsMonitoring = () => {
     return 'text-slate-700';
   };
 
-  const filteredPatients = patients.filter(p => p.patientName?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredPatients = patients.filter(p => ((p.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())));
 
   return (
     <div className="flex flex-col md:flex-row gap-6 h-full overflow-hidden">

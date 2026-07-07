@@ -84,8 +84,8 @@ const InsuranceClaim = () => {
   };
 
   const filteredClaims = claims.filter(c => 
-    c.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.provider?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((c.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) ||
+    ((c.provider || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

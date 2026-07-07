@@ -81,8 +81,8 @@ const IPDManagement = () => {
   };
 
   const filteredAdmissions = admissions.filter(a => {
-    const matchesSearch = a.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          a.patientId?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = ((a.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+                          ((a.patientId || "").toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'all' || a.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { showConfirm } from '../../utils/popup';
+import { collection, query, where, onSnapshot, setDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth, secondaryAuth } from '../../firebase';
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
+import { showConfirm, showPopup } from '../../utils/popup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Search, Edit2, Trash2, Mail, Phone, Shield, X, CheckCircle2 } from 'lucide-react';
 
@@ -53,16 +54,33 @@ const StaffManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'users'), {
+      // 1. Create a temporary random password
+      const tempPassword = Math.random().toString(36).slice(-10) + 'A1!';
+      
+      // 2. Create the user in Auth using the secondary app (so admin doesn't get logged out)
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, tempPassword);
+      const uid = userCredential.user.uid;
+      
+      // 3. Log out of the secondary app immediately
+      await signOut(secondaryAuth);
+      
+      // 4. Send the password reset email so the staff can set their own password
+      await sendPasswordResetEmail(auth, formData.email);
+      
+      // 5. Store staff details in Firestore using the Auth UID
+      await setDoc(doc(db, 'users', uid), {
         ...formData,
         hospitalId,
         status: 'active',
         createdAt: serverTimestamp(),
       });
+      
+      showPopup('Staff added and invitation email sent!', 'success');
       setIsModalOpen(false);
       setFormData({ name: '', email: '', phone: '', role: 'doctor', specialization: '', department: '' });
     } catch (error) {
       console.error("Error adding staff:", error);
+      showPopup(error.message, 'error');
     }
   };
 

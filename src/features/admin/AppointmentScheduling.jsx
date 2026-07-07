@@ -64,7 +64,7 @@ const AppointmentScheduling = () => {
   };
 
   const filteredAppointments = appointments.filter(app => 
-    app.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ((app.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) ||
     app.contactNumber?.includes(searchTerm)
   );
 

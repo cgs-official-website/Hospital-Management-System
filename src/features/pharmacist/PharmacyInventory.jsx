@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, query, where, onSnapshot, addDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { showPopup, showConfirm } from '../../utils/popup';
-import { PackageSearch, Plus, AlertCircle, Trash2 } from 'lucide-react';
+import { PackageSearch, Plus, AlertCircle, Trash2, Upload } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import Modal from '../../shared/components/Modal';
 
 const PharmacyInventory = () => {
@@ -11,6 +12,7 @@ const PharmacyInventory = () => {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -60,6 +62,43 @@ const PharmacyInventory = () => {
     });
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json(ws);
+        
+        let addedCount = 0;
+        for (const row of data) {
+          if (!row.Name || row.Stock == null) continue;
+          
+          await addDoc(collection(db, 'inventory'), {
+            hospitalId,
+            name: row.Name,
+            category: row.Category || 'Tablet',
+            stock: parseInt(row.Stock) || 0,
+            price: parseFloat(row.Price) || 0,
+            expiry: row.Expiry || ''
+          });
+          addedCount++;
+        }
+        showPopup(`Successfully uploaded ${addedCount} medicines`, 'success');
+        e.target.value = null; 
+      } catch (error) {
+        console.error("Error parsing Excel:", error);
+        showPopup("Failed to parse Excel file. Ensure columns are: Name, Category, Stock, Price, Expiry.", "error");
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const filteredMeds = medicines.filter(m => m.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
@@ -77,6 +116,16 @@ const PharmacyInventory = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <input 
+            type="file" 
+            accept=".xlsx, .xls, .csv" 
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+          />
+          <button onClick={() => fileInputRef.current.click()} className="btn-secondary shrink-0 flex items-center gap-2 font-bold px-4 py-2 border border-slate-200 rounded-xl text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+            <Upload size={18} /> Upload Excel
+          </button>
           <button onClick={() => setIsModalOpen(true)} className="btn-primary shrink-0 flex items-center gap-2">
             <Plus size={18} /> Add Item
           </button>

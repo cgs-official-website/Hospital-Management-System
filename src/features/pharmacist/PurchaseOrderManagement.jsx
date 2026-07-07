@@ -89,7 +89,7 @@ const PurchaseOrderManagement = () => {
   };
 
   const filteredPOs = purchaseOrders.filter(po => 
-    po.supplierName?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((po.supplierName || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

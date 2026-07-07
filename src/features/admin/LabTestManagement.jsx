@@ -78,8 +78,8 @@ const LabTestManagement = () => {
   };
 
   const filteredOrders = labOrders.filter(order => {
-    const matchesSearch = order.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          order.testName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = ((order.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+                          ((order.testName || "").toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

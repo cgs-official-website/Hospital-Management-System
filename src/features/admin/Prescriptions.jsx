@@ -85,8 +85,8 @@ const Prescriptions = () => {
   };
 
   const filteredConsultations = consultations.filter(c => 
-    c.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    c.patientId?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((c.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+    ((c.patientId || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

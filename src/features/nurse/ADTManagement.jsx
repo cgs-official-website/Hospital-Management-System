@@ -67,8 +67,8 @@ const ADTManagement = () => {
   };
 
   const filteredAdmissions = admissions.filter(a => 
-    a.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    a.bedNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((a.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+    ((a.bedNumber || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (

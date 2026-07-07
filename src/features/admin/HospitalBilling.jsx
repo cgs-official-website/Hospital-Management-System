@@ -80,8 +80,8 @@ const HospitalBilling = () => {
   };
 
   const filteredInvoices = invoices.filter(inv => {
-    const matchesSearch = inv.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          inv.patientId?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = ((inv.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+                          ((inv.patientId || "").toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = filterStatus === 'all' || inv.status === filterStatus;
     return matchesSearch && matchesStatus;
   });

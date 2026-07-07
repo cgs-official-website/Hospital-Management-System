@@ -31,8 +31,8 @@ const VendorOnboarding = () => {
 
   const filteredHospitals = hospitals.filter(hosp => {
     const matchesFilter = filter === 'all' || hosp.status === filter;
-    const matchesSearch = hosp.hospitalName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          hosp.registrationNo?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = ((hosp.hospitalName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+                          ((hosp.registrationNo || "").toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesFilter && matchesSearch;
   });
 

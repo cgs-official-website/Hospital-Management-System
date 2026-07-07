@@ -75,8 +75,8 @@ const PrescriptionDispensing = () => {
   };
 
   const filtered = prescriptions.filter(p => 
-    p.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.patientId?.toLowerCase().includes(searchTerm.toLowerCase())
+    ((p.patientName || "").toLowerCase().includes(searchTerm.toLowerCase())) || 
+    ((p.patientId || "").toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
