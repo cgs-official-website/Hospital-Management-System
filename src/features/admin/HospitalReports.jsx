@@ -62,11 +62,11 @@ const HospitalReports = () => {
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Analytics & Reports</h1>
           <p className="text-slate-500 mt-1">Real-time hospital performance and financial metrics.</p>
         </div>
-        <div className="flex gap-3">
-          <button className="btn-secondary">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
+          <button className="btn-secondary w-full sm:w-auto justify-center">
             <FileText size={18} /> Generate PDF
           </button>
-          <button className="btn-primary">
+          <button className="btn-primary w-full sm:w-auto justify-center">
             <Download size={18} /> Export Data
           </button>
         </div>
@@ -79,7 +79,7 @@ const HospitalReports = () => {
       ) : (
         <>
           {/* Top KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-panel p-6 border-b-4 border-b-emerald-500 relative overflow-hidden">
               <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full blur-2xl opacity-60"></div>
@@ -131,7 +131,7 @@ const HospitalReports = () => {
           </div>
 
           {/* Charts Area */}
-          <div className="grid grid-cols-1 lg:grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="glass-panel p-6 lg:col-span-2">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">

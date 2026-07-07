@@ -9,6 +9,7 @@ const DepartmentManagement = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   const hospitalId = localStorage.getItem('hospitalId');
@@ -41,19 +42,53 @@ const DepartmentManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEditClick = (dept) => {
+    setEditingId(dept.id);
+    setFormData({
+      name: dept.name || '',
+      head: dept.head || '',
+      description: dept.description || '',
+      status: dept.status || 'active'
+    });
+    setIsModalOpen(true);
+  };
+
+  const openNewModal = () => {
+    setEditingId(null);
+    setFormData({ name: '', head: '', description: '', status: 'active' });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await addDoc(collection(db, 'departments'), {
-        ...formData,
-        hospitalId,
-        createdAt: serverTimestamp(),
-      });
-      setIsModalOpen(false);
-      setFormData({ name: '', head: '', description: '', status: 'active' });
-    } catch (error) {
-      console.error("Error adding department:", error);
-    }
+    
+    const isEdit = !!editingId;
+    const currentEditingId = editingId;
+    const currentFormData = { ...formData };
+    
+    // Close modal immediately
+    setIsModalOpen(false);
+    setFormData({ name: '', head: '', description: '', status: 'active' });
+    setEditingId(null);
+
+    // Wait for modal exit animation
+    setTimeout(async () => {
+      try {
+        if (isEdit) {
+          await updateDoc(doc(db, 'departments', currentEditingId), {
+            ...currentFormData
+          });
+        } else {
+          await addDoc(collection(db, 'departments'), {
+            ...currentFormData,
+            hospitalId,
+            createdAt: serverTimestamp(),
+          });
+        }
+      } catch (error) {
+        console.error("Error saving department:", error);
+      }
+    }, 300);
   };
 
   const handleDelete = async (id) => {
@@ -77,7 +112,7 @@ const DepartmentManagement = () => {
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Departments & Wards</h1>
           <p className="text-slate-500 mt-1">Structure your hospital by creating specialized units.</p>
         </div>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">
+        <button onClick={openNewModal} className="btn-primary">
           <Plus size={20} /> Create Department
         </button>
       </div>
@@ -115,7 +150,7 @@ const DepartmentManagement = () => {
               {filteredDepts.map((dept) => (
                 <div key={dept.id} className="bg-white border border-slate-200 p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative group">
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 text-slate-400 hover:text-primary bg-slate-50 hover:bg-sky-50 rounded-xl transition-colors">
+                    <button onClick={() => handleEditClick(dept)} className="p-2 text-slate-400 hover:text-primary bg-slate-50 hover:bg-sky-50 rounded-xl transition-colors">
                       <Edit2 size={16} />
                     </button>
                     <button onClick={() => handleDelete(dept.id)} className="p-2 text-slate-400 hover:text-red-500 bg-slate-50 hover:bg-red-50 rounded-xl transition-colors">
@@ -163,9 +198,9 @@ const DepartmentManagement = () => {
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">New Department</h2>
+                  <h2 className="text-xl font-bold text-slate-800">{editingId ? 'Edit Department' : 'New Department'}</h2>
                 </div>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700 bg-white shadow-sm p-2 rounded-full">
+                <button onClick={() => { setIsModalOpen(false); setEditingId(null); }} className="text-slate-400 hover:text-slate-700 bg-white shadow-sm p-2 rounded-full">
                   <X size={20} />
                 </button>
               </div>
@@ -208,12 +243,12 @@ const DepartmentManagement = () => {
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 shrink-0">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary">
+                  <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); }} className="btn-secondary">
                     Cancel
                   </button>
                   <button type="submit" className="btn-primary">
                     <Plus size={18} />
-                    Create Unit
+                    {editingId ? 'Save Changes' : 'Create Unit'}
                   </button>
                 </div>
               </form>

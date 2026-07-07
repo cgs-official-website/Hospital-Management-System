@@ -70,9 +70,9 @@ const HospitalBilling = () => {
   };
 
   const markAsPaid = async (id, method) => {
-    showConfirm(`Mark this invoice as Paid via ${method}?`, async () => {
+    showConfirm(`Mark invoice as paid via ${method}?`, async () => {
       try {
-        await updateDoc(doc(db, 'invoices', id), { status: 'Paid', paymentMethod: method });
+        await updateDoc(doc(db, 'invoices', id), { status: 'paid', paymentMethod: method });
       } catch (error) {
         console.error("Error updating invoice: ", error);
       }
@@ -101,7 +101,7 @@ const HospitalBilling = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 shrink-0">
         <div className="glass-panel p-6 flex items-center justify-between border-b-4 border-b-emerald-500">
           <div>
             <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Collected</p>

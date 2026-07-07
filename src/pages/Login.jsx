@@ -13,6 +13,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  React.useEffect(() => {
+    if (localStorage.getItem('role')) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

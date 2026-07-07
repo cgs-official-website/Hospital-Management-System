@@ -73,7 +73,7 @@ const IPDManagement = () => {
   const handleDischarge = async (id) => {
     showConfirm("Are you sure you want to discharge this patient? This will free up their bed.", async () => {
       try {
-        await updateDoc(doc(db, 'ipd_admissions', id), { status: 'Discharged' });
+        await updateDoc(doc(db, 'ipd_admissions', id), { status: 'discharged' });
       } catch (error) {
         console.error("Error discharging: ", error);
       }

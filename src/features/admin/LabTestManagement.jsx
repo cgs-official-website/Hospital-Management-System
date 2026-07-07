@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,9 @@ const LabTestManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('pending'); // pending, processing, completed
   
+  const fileInputRef = useRef(null);
+  const [uploadingOrderId, setUploadingOrderId] = useState(null);
+
   const hospitalId = localStorage.getItem('hospitalId');
 
   const [formData, setFormData] = useState({
@@ -75,6 +78,30 @@ const LabTestManagement = () => {
     } catch (error) {
       console.error("Error updating status:", error);
     }
+  };
+
+  const handleFileUploadClick = (orderId) => {
+    setUploadingOrderId(orderId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file || !uploadingOrderId) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        await updateDoc(doc(db, 'lab_orders', uploadingOrderId), {
+          status: 'completed',
+          resultLink: reader.result
+        });
+        setUploadingOrderId(null);
+        e.target.value = null;
+      } catch (error) {
+        console.error("Error uploading file:", error);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const filteredOrders = labOrders.filter(order => {
@@ -182,13 +209,16 @@ const LabTestManagement = () => {
                       )}
                       
                       {order.status === 'processing' && (
-                        <button onClick={() => updateStatus(order.id, 'completed')} className="text-sm font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors">
+                        <button onClick={() => handleFileUploadClick(order.id)} className="text-sm font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-colors">
                           <Upload size={14}/> Upload Results
                         </button>
                       )}
 
-                      {order.status === 'completed' && (
-                        <button className="text-sm font-bold text-primary flex items-center gap-1 hover:underline">
+                      {order.status === 'completed' && order.resultLink && (
+                        <button onClick={() => {
+                          const w = window.open();
+                          w.document.write(`<iframe src="${order.resultLink}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                        }} className="text-sm font-bold text-primary flex items-center gap-1 hover:underline">
                           <FileText size={14}/> View Report
                         </button>
                       )}
@@ -198,6 +228,7 @@ const LabTestManagement = () => {
               ))}
             </div>
           )}
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,application/pdf" />
         </div>
       </div>
 

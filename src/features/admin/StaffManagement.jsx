@@ -10,6 +10,7 @@ const StaffManagement = () => {
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,37 +52,78 @@ const StaffManagement = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleEditClick = (member) => {
+    setEditingId(member.id);
+    setFormData({
+      name: member.name || '',
+      email: member.email || '',
+      phone: member.phone || '',
+      role: member.role || 'doctor',
+      specialization: member.specialization || '',
+      department: member.department || ''
+    });
+    setIsModalOpen(true);
+  };
+
+  const openNewModal = () => {
+    setEditingId(null);
+    setFormData({ name: '', email: '', phone: '', role: 'doctor', specialization: '', department: '' });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // 1. Create a temporary random password
-      const tempPassword = Math.random().toString(36).slice(-10) + 'A1!';
-      
-      // 2. Create the user in Auth using the secondary app (so admin doesn't get logged out)
-      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, formData.email, tempPassword);
-      const uid = userCredential.user.uid;
-      
-      // 3. Log out of the secondary app immediately
-      await signOut(secondaryAuth);
-      
-      // 4. Send the password reset email so the staff can set their own password
-      await sendPasswordResetEmail(auth, formData.email);
-      
-      // 5. Store staff details in Firestore using the Auth UID
-      await setDoc(doc(db, 'users', uid), {
-        ...formData,
-        hospitalId,
-        status: 'active',
-        createdAt: serverTimestamp(),
-      });
-      
-      showPopup('Staff added and invitation email sent!', 'success');
-      setIsModalOpen(false);
-      setFormData({ name: '', email: '', phone: '', role: 'doctor', specialization: '', department: '' });
-    } catch (error) {
-      console.error("Error adding staff:", error);
-      showPopup(error.message, 'error');
-    }
+    
+    const isEdit = !!editingId;
+    const currentEditingId = editingId;
+    const currentFormData = { ...formData };
+    
+    // Close modal immediately
+    setIsModalOpen(false);
+    setFormData({ name: '', email: '', phone: '', role: 'doctor', specialization: '', department: '' });
+    setEditingId(null);
+
+    // Wait for modal exit animation (300ms) before updating DB
+    setTimeout(async () => {
+      try {
+        if (isEdit) {
+          await updateDoc(doc(db, 'users', currentEditingId), {
+            name: currentFormData.name,
+            phone: currentFormData.phone,
+            role: currentFormData.role,
+            specialization: currentFormData.specialization,
+            department: currentFormData.department
+          });
+          showPopup('Staff updated successfully!', 'success');
+        } else {
+          // 1. Create a temporary random password
+          const tempPassword = Math.random().toString(36).slice(-10) + 'A1!';
+          
+          // 2. Create the user in Auth using the secondary app
+          const userCredential = await createUserWithEmailAndPassword(secondaryAuth, currentFormData.email, tempPassword);
+          const uid = userCredential.user.uid;
+          
+          // 3. Log out of the secondary app immediately
+          await signOut(secondaryAuth);
+          
+          // 4. Send the password reset email so the staff can set their own password
+          await sendPasswordResetEmail(auth, currentFormData.email);
+          
+          // 5. Store staff details in Firestore using the Auth UID
+          await setDoc(doc(db, 'users', uid), {
+            ...currentFormData,
+            hospitalId,
+            status: 'active',
+            createdAt: serverTimestamp(),
+          });
+          
+          showPopup('Staff added and invitation email sent!', 'success');
+        }
+      } catch (error) {
+        console.error("Error adding staff:", error);
+        showPopup(error.message, 'error');
+      }
+    }, 300);
   };
 
   const handleDelete = async (id) => {
@@ -114,7 +156,7 @@ const StaffManagement = () => {
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Staff Management</h1>
           <p className="text-slate-500 mt-1">Manage doctors, nurses, and administrative personnel.</p>
         </div>
-        <button onClick={() => setIsModalOpen(true)} className="btn-primary">
+        <button onClick={openNewModal} className="btn-primary">
           <UserPlus size={20} /> Add Staff
         </button>
       </div>
@@ -220,7 +262,7 @@ const StaffManagement = () => {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <button className="p-2 text-slate-400 hover:text-primary hover:bg-sky-50 rounded-lg transition-colors">
+                        <button onClick={() => handleEditClick(member)} className="p-2 text-slate-400 hover:text-primary hover:bg-sky-50 rounded-lg transition-colors">
                           <Edit2 size={18} />
                         </button>
                         <button onClick={() => handleDelete(member.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
@@ -274,10 +316,10 @@ const StaffManagement = () => {
             >
               <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">Add New Staff Member</h2>
-                  <p className="text-sm text-slate-500">Create credentials and assign a role.</p>
+                  <h2 className="text-xl font-bold text-slate-800">{editingId ? 'Edit Staff Member' : 'Add New Staff Member'}</h2>
+                  <p className="text-sm text-slate-500">{editingId ? 'Update staff details.' : 'Create credentials and assign a role.'}</p>
                 </div>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-700 bg-white shadow-sm p-2 rounded-full">
+                <button onClick={() => { setIsModalOpen(false); setEditingId(null); }} className="text-slate-400 hover:text-slate-700 bg-white shadow-sm p-2 rounded-full">
                   <X size={20} />
                 </button>
               </div>
@@ -306,7 +348,8 @@ const StaffManagement = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="input-field" 
+                      disabled={!!editingId}
+                      className="input-field disabled:opacity-50 disabled:bg-slate-50" 
                       placeholder="jane.doe@hospital.com"
                     />
                   </div>
@@ -372,21 +415,23 @@ const StaffManagement = () => {
 
                 </div>
 
-                <div className="p-4 bg-sky-50 rounded-xl border border-sky-100 flex items-start gap-3">
-                  <Shield className="text-primary mt-0.5 shrink-0" size={20} />
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-800">Security Notice</h4>
-                    <p className="text-xs text-slate-600 mt-1">An email will be sent to the staff member with instructions to set their password. They will be strictly bound to this hospital workspace.</p>
+                {!editingId && (
+                  <div className="p-4 bg-sky-50 rounded-xl border border-sky-100 flex items-start gap-3">
+                    <Shield className="text-primary mt-0.5 shrink-0" size={20} />
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800">Security Notice</h4>
+                      <p className="text-xs text-slate-600 mt-1">An email will be sent to the staff member with instructions to set their password. They will be strictly bound to this hospital workspace.</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 shrink-0">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary">
+                  <button type="button" onClick={() => { setIsModalOpen(false); setEditingId(null); }} className="btn-secondary">
                     Cancel
                   </button>
                   <button type="submit" className="btn-primary">
                     <UserPlus size={18} />
-                    Onboard Staff
+                    {editingId ? 'Save Changes' : 'Onboard Staff'}
                   </button>
                 </div>
               </form>

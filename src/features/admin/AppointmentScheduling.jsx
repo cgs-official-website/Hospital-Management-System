@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, doc, updateDoc, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Calendar as CalendarIcon, Clock, User, Phone, CheckCircle2, XCircle, Search, FileText } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, User, Phone, CheckCircle2, XCircle, Search, FileText, Plus } from 'lucide-react';
 import { showPopup } from '../../utils/popup';
+import Modal from '../../shared/components/Modal';
 
 const AppointmentScheduling = () => {
   const hospitalId = localStorage.getItem('hospitalId');
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    patientId: '',
+    doctorId: '',
+    date: '',
+    time: '',
+    notes: ''
+  });
 
   useEffect(() => {
     if (!hospitalId) return;
@@ -23,6 +34,12 @@ const AppointmentScheduling = () => {
       setDoctors(docsList);
     };
     fetchDoctors();
+
+    // Fetch Patients
+    const qPat = query(collection(db, 'patients'), where('hospitalId', '==', hospitalId));
+    const unsubPat = onSnapshot(qPat, (snap) => {
+      setPatients(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
 
     // Listen to appointments
     const q = query(collection(db, 'appointments'), where('hospitalId', '==', hospitalId));
@@ -38,7 +55,7 @@ const AppointmentScheduling = () => {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => { unsubscribe(); unsubPat(); };
   }, [hospitalId]);
 
   const handleUpdateStatus = async (appointmentId, newStatus) => {
@@ -49,6 +66,33 @@ const AppointmentScheduling = () => {
     } catch (error) {
       console.error("Error updating appointment:", error);
       showPopup('Failed to update status', 'error');
+    }
+  };
+
+  const handleBook = async (e) => {
+    e.preventDefault();
+    try {
+      const patient = patients.find(p => p.id === formData.patientId);
+      const doctor = doctors.find(d => d.id === formData.doctorId);
+      
+      await addDoc(collection(db, 'appointments'), {
+        hospitalId,
+        patientId: formData.patientId,
+        patientName: patient?.name || 'Unknown',
+        doctorId: formData.doctorId,
+        doctorName: doctor?.name || 'Unknown',
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes,
+        status: 'scheduled',
+        createdAt: serverTimestamp()
+      });
+      setIsModalOpen(false);
+      setFormData({ patientId: '', doctorId: '', date: '', time: '', notes: '' });
+      showPopup('Appointment booked successfully', 'success');
+    } catch (error) {
+      console.error("Error booking appointment", error);
+      showPopup('Failed to book appointment', 'error');
     }
   };
 
@@ -75,15 +119,20 @@ const AppointmentScheduling = () => {
           <h2 className="text-2xl font-bold text-slate-800">Appointment Scheduling</h2>
           <p className="text-sm text-slate-500">Manage incoming patient bookings and assign doctors.</p>
         </div>
-        <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <input 
-            type="text" 
-            placeholder="Search patients..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field pl-10 h-10 py-1 text-sm"
-          />
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text" 
+              placeholder="Search patients..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="input-field pl-10 h-10 py-1 text-sm w-full"
+            />
+          </div>
+          <button onClick={() => setIsModalOpen(true)} className="btn-primary h-10 px-4 whitespace-nowrap">
+            <Plus size={16} /> Book Appt
+          </button>
         </div>
       </div>
 
@@ -180,6 +229,40 @@ const AppointmentScheduling = () => {
           </div>
         )}
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="New Appointment">
+        <form onSubmit={handleBook} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Select Patient</label>
+            <select required className="input-field" value={formData.patientId} onChange={e => setFormData({...formData, patientId: e.target.value})}>
+              <option value="">-- Choose Patient --</option>
+              {patients.map(p => <option key={p.id} value={p.id}>{p.name} ({p.contact})</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Select Doctor</label>
+            <select required className="input-field" value={formData.doctorId} onChange={e => setFormData({...formData, doctorId: e.target.value})}>
+              <option value="">-- Choose Doctor --</option>
+              {doctors.map(d => <option key={d.id} value={d.id}>Dr. {d.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Date</label>
+              <input required type="date" className="input-field" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Time</label>
+              <input required type="time" className="input-field" value={formData.time} onChange={e => setFormData({...formData, time: e.target.value})} min={formData.date === new Date().toISOString().split('T')[0] ? new Date().toTimeString().substring(0, 5) : undefined} />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Notes</label>
+            <input type="text" className="input-field" placeholder="Reason for visit..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} />
+          </div>
+          <button type="submit" className="btn-primary w-full mt-2">Book Appointment</button>
+        </form>
+      </Modal>
     </div>
   );
 };
