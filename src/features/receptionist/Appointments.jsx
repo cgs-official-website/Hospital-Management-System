@@ -103,68 +103,70 @@ const Appointments = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto custom-scrollbar w-full">
+      <div className="flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
         {(() => {
           const totalPages = Math.ceil(appointments.length / itemsPerPage);
           const currentAppointments = appointments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
           
           return (
             <>
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
-                    <th className="py-3 px-4 font-medium">Date & Time</th>
-                    <th className="py-3 px-4 font-medium">Patient</th>
-                    <th className="py-3 px-4 font-medium">Doctor</th>
-                    <th className="py-3 px-4 font-medium">Status</th>
-                    <th className="py-3 px-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-8 text-slate-500">
-                        <CalendarClock size={32} className="mx-auto mb-2 opacity-50" />
-                        No appointments scheduled.
-                      </td>
+              <div className="flex-1 overflow-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
+                      <th className="py-3 px-4 font-medium">Date & Time</th>
+                      <th className="py-3 px-4 font-medium">Patient</th>
+                      <th className="py-3 px-4 font-medium">Doctor</th>
+                      <th className="py-3 px-4 font-medium">Status</th>
+                      <th className="py-3 px-4 font-medium text-right">Actions</th>
                     </tr>
-                  ) : (
-                    currentAppointments.map(app => (
-                      <tr key={app.id} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="py-3 px-4">
-                          <span className="font-bold text-slate-800 block">{app.date}</span>
-                          <span className="text-sm text-slate-500">{app.time}</span>
-                        </td>
-                        <td className="py-3 px-4 font-medium text-primary">{app.patientName}</td>
-                        <td className="py-3 px-4 text-slate-600">
-                          {app.doctorId || app.doctorName ? `Dr. ${getDoctorName(app.doctorId, app.doctorName)}` : 'Unassigned'}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
-                            app.status === 'completed' ? 'bg-green-100 text-green-700' :
-                            app.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                            'bg-orange-100 text-orange-700'
-                          }`}>
-                            {app.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 flex justify-end gap-2">
-                          {app.status === 'scheduled' && (
-                            <>
-                              <button onClick={() => handleStatus(app.id, 'completed')} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Mark Completed"><CheckCircle size={18}/></button>
-                              <button onClick={() => handleStatus(app.id, 'cancelled')} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Cancel"><XCircle size={18}/></button>
-                            </>
-                          )}
+                  </thead>
+                  <tbody>
+                    {appointments.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="text-center py-8 text-slate-500">
+                          <CalendarClock size={32} className="mx-auto mb-2 opacity-50" />
+                          No appointments scheduled.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      currentAppointments.map(app => (
+                        <tr key={app.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4">
+                            <span className="font-bold text-slate-800 block">{app.date}</span>
+                            <span className="text-sm text-slate-500">{app.time}</span>
+                          </td>
+                          <td className="py-3 px-4 font-medium text-primary">{app.patientName}</td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {app.doctorId || app.doctorName ? `Dr. ${getDoctorName(app.doctorId, app.doctorName)}` : 'Unassigned'}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
+                              app.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              app.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-orange-100 text-orange-700'
+                            }`}>
+                              {app.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 flex justify-end gap-2">
+                            {app.status === 'scheduled' && (
+                              <>
+                                <button onClick={() => handleStatus(app.id, 'completed')} className="p-1.5 text-green-600 hover:bg-green-50 rounded" title="Mark Completed"><CheckCircle size={18}/></button>
+                                <button onClick={() => handleStatus(app.id, 'cancelled')} className="p-1.5 text-red-600 hover:bg-red-50 rounded" title="Cancel"><XCircle size={18}/></button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
               
               {/* Pagination */}
               {totalPages > 0 && (
-                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                   <span className="text-sm font-medium text-slate-500">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, appointments.length)} of {appointments.length} entries
                   </span>

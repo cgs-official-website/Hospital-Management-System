@@ -90,7 +90,7 @@ const Prescriptions = () => {
   );
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 flex flex-col">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Doctor Consultation</h1>
@@ -101,7 +101,7 @@ const Prescriptions = () => {
         </button>
       </div>
 
-      <div className="glass-panel p-6 flex-1 flex flex-col overflow-hidden">
+      <div className="glass-panel p-6 flex flex-col">
         
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 shrink-0">
@@ -118,7 +118,7 @@ const Prescriptions = () => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-auto custom-scrollbar">
+        <div className="overflow-x-auto custom-scrollbar">
           {loading ? (
             <div className="flex justify-center p-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

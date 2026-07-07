@@ -83,68 +83,70 @@ const PharmacyInventory = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto custom-scrollbar w-full">
+      <div className="flex-1 flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
         {(() => {
           const totalPages = Math.ceil(filteredMeds.length / itemsPerPage);
           const currentMeds = filteredMeds.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
           
           return (
             <>
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
-                    <th className="py-3 px-4 font-medium">Medicine Name</th>
-                    <th className="py-3 px-4 font-medium">Category</th>
-                    <th className="py-3 px-4 font-medium text-center">Stock Level</th>
-                    <th className="py-3 px-4 font-medium">Unit Price</th>
-                    <th className="py-3 px-4 font-medium">Expiry Date</th>
-                    <th className="py-3 px-4 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredMeds.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center py-8 text-slate-500">
-                        <PackageSearch size={32} className="mx-auto mb-2 opacity-50" />
-                        No medicines found in inventory.
-                      </td>
+              <div className="flex-1 overflow-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
+                      <th className="py-3 px-4 font-medium">Medicine Name</th>
+                      <th className="py-3 px-4 font-medium">Category</th>
+                      <th className="py-3 px-4 font-medium text-center">Stock Level</th>
+                      <th className="py-3 px-4 font-medium">Unit Price</th>
+                      <th className="py-3 px-4 font-medium">Expiry Date</th>
+                      <th className="py-3 px-4 font-medium text-right">Actions</th>
                     </tr>
-                  ) : (
-                    currentMeds.map(med => (
-                      <tr key={med.id} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="py-3 px-4 font-bold text-slate-800">{med.name}</td>
-                        <td className="py-3 px-4 text-sm text-slate-600">{med.category}</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            med.stock > 50 ? 'bg-green-100 text-green-700' :
-                            med.stock > 10 ? 'bg-orange-100 text-orange-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {med.stock} Units
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-sm font-medium text-slate-700">₹{med.price.toFixed(2)}</td>
-                        <td className="py-3 px-4 text-sm">
-                          {new Date(med.expiry) < new Date() ? (
-                            <span className="text-red-500 flex items-center gap-1 font-bold"><AlertCircle size={14}/> EXPIRED</span>
-                          ) : (
-                            <span className="text-slate-600">{med.expiry}</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 flex justify-end gap-2">
-                          <button onClick={() => handleDelete(med.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
-                            <Trash2 size={18} />
-                          </button>
+                  </thead>
+                  <tbody>
+                    {filteredMeds.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center py-8 text-slate-500">
+                          <PackageSearch size={32} className="mx-auto mb-2 opacity-50" />
+                          No medicines found in inventory.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      currentMeds.map(med => (
+                        <tr key={med.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="py-3 px-4 font-bold text-slate-800">{med.name}</td>
+                          <td className="py-3 px-4 text-sm text-slate-600">{med.category}</td>
+                          <td className="py-3 px-4 text-center">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              med.stock > 50 ? 'bg-green-100 text-green-700' :
+                              med.stock > 10 ? 'bg-orange-100 text-orange-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {med.stock} Units
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-sm font-medium text-slate-700">₹{med.price.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-sm">
+                            {new Date(med.expiry) < new Date() ? (
+                              <span className="text-red-500 flex items-center gap-1 font-bold"><AlertCircle size={14}/> EXPIRED</span>
+                            ) : (
+                              <span className="text-slate-600">{med.expiry}</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 flex justify-end gap-2">
+                            <button onClick={() => handleDelete(med.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                              <Trash2 size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
               
               {/* Pagination */}
               {totalPages > 0 && (
-                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                   <span className="text-sm font-medium text-slate-500">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredMeds.length)} of {filteredMeds.length} entries
                   </span>

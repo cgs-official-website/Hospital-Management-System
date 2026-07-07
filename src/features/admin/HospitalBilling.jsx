@@ -90,7 +90,7 @@ const HospitalBilling = () => {
   const pendingAmount = invoices.filter(inv => inv.status === 'unpaid').reduce((sum, inv) => sum + (inv.amount || 0), 0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 h-full flex flex-col">
+    <div className="p-6 max-w-7xl mx-auto space-y-6 flex flex-col">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Billing & Invoicing</h1>
@@ -128,7 +128,7 @@ const HospitalBilling = () => {
         </div>
       </div>
 
-      <div className="glass-panel p-6 flex-1 flex flex-col overflow-hidden">
+      <div className="glass-panel p-6 flex flex-col">
         
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row gap-4 mb-6 shrink-0">
@@ -156,14 +156,16 @@ const HospitalBilling = () => {
         </div>
 
         {/* List */}
-        <div className="flex-1 overflow-auto custom-scrollbar border border-slate-200 rounded-2xl bg-white/50">
+        <div className="flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
           {(() => {
             const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage);
             const currentInvoices = filteredInvoices.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
             
             return (
               <>
-                <table className="w-full text-left border-collapse">
+                
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
                   <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
                     <tr>
                       <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient Details</th>
@@ -236,10 +238,11 @@ const HospitalBilling = () => {
                     )}
                   </tbody>
                 </table>
+                </div>
                 
                 {/* Pagination */}
                 {totalPages > 0 && (
-                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 shrink-0 gap-4">
                     <span className="text-sm font-medium text-slate-500">
                       Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredInvoices.length)} of {filteredInvoices.length} entries
                     </span>

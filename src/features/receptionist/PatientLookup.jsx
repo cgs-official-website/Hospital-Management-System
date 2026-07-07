@@ -72,76 +72,78 @@ const PatientLookup = () => {
       </div>
 
       <div className="flex-1 overflow-auto custom-scrollbar -mx-6 px-6">
-        <div className="border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
+        <div className="flex-1 flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
           {(() => {
             const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
             const currentPatients = filteredPatients.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
             
             return (
               <>
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
-                    <tr>
-                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient Details</th>
-                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Contact</th>
-                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Demographics</th>
-                      <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Registered</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr><td colSpan="4" className="p-8 text-center text-slate-500">Loading directory...</td></tr>
-                    ) : filteredPatients.length === 0 ? (
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
                       <tr>
-                        <td colSpan="4" className="p-12 text-center text-slate-500">
-                          <Users size={48} className="mx-auto mb-4 text-slate-300" />
-                          <p className="font-bold text-lg">No patients found</p>
-                          <p className="text-sm">Try adjusting your search query.</p>
-                        </td>
+                        <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Patient Details</th>
+                        <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Contact</th>
+                        <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Demographics</th>
+                        <th className="p-4 font-bold text-slate-600 text-sm border-b border-slate-200">Registered</th>
                       </tr>
-                    ) : (
-                      currentPatients.map(patient => (
-                        <tr 
-                          key={patient.id} 
-                          onClick={() => handleRowClick(patient)}
-                          className="border-b border-slate-100 hover:bg-sky-50/50 transition-colors cursor-pointer group"
-                        >
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 group-hover:bg-primary group-hover:text-white transition-colors">
-                                {patient.name?.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-800 text-base group-hover:text-primary transition-colors">{patient.name}</p>
-                                <p className="text-xs text-slate-500">ID: {patient.id.substring(0, 8).toUpperCase()}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className="flex items-center gap-2 text-sm text-slate-700 font-medium">
-                              <Phone size={14} className="text-slate-400" /> {patient.contact}
-                            </span>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex gap-2 text-xs font-bold text-slate-600">
-                              <span className="bg-slate-100 px-2 py-1 rounded flex items-center gap-1"><User size={12}/> {patient.gender}</span>
-                              <span className="bg-red-50 text-red-600 px-2 py-1 rounded flex items-center gap-1 border border-red-100"><Droplet size={12}/> {patient.bloodGroup}</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <span className="flex items-center gap-2 text-sm text-slate-500">
-                              <Calendar size={14} /> {patient.registeredAt ? new Date(patient.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
-                            </span>
+                    </thead>
+                    <tbody>
+                      {loading ? (
+                        <tr><td colSpan="4" className="p-8 text-center text-slate-500">Loading directory...</td></tr>
+                      ) : filteredPatients.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="p-12 text-center text-slate-500">
+                            <Users size={48} className="mx-auto mb-4 text-slate-300" />
+                            <p className="font-bold text-lg">No patients found</p>
+                            <p className="text-sm">Try adjusting your search query.</p>
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        currentPatients.map(patient => (
+                          <tr 
+                            key={patient.id} 
+                            onClick={() => handleRowClick(patient)}
+                            className="border-b border-slate-100 hover:bg-sky-50/50 transition-colors cursor-pointer group"
+                          >
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 group-hover:bg-primary group-hover:text-white transition-colors">
+                                  {patient.name?.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-bold text-slate-800 text-base group-hover:text-primary transition-colors">{patient.name}</p>
+                                  <p className="text-xs text-slate-500">ID: {patient.id.substring(0, 8).toUpperCase()}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="flex items-center gap-2 text-sm text-slate-700 font-medium">
+                                <Phone size={14} className="text-slate-400" /> {patient.contact}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex gap-2 text-xs font-bold text-slate-600">
+                                <span className="bg-slate-100 px-2 py-1 rounded flex items-center gap-1"><User size={12}/> {patient.gender}</span>
+                                <span className="bg-red-50 text-red-600 px-2 py-1 rounded flex items-center gap-1 border border-red-100"><Droplet size={12}/> {patient.bloodGroup}</span>
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              <span className="flex items-center gap-2 text-sm text-slate-500">
+                                <Calendar size={14} /> {patient.registeredAt ? new Date(patient.registeredAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
                 
                 {/* Pagination */}
                 {totalPages > 0 && (
-                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                     <span className="text-sm font-medium text-slate-500">
                       Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredPatients.length)} of {filteredPatients.length} entries
                     </span>

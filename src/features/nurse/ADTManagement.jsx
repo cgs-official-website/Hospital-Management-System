@@ -100,13 +100,15 @@ const ADTManagement = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto custom-scrollbar -mx-6 px-6">
+      {/* Table */}
+      <div className="flex-1 flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
         {(() => {
           const totalPages = Math.ceil(filteredAdmissions.length / itemsPerPage);
           const currentAdmissions = filteredAdmissions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
           
           return (
             <>
+              <div className="flex-1 overflow-auto custom-scrollbar">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-slate-50/80 sticky top-0 backdrop-blur-md z-10">
                   <tr>
@@ -164,10 +166,11 @@ const ADTManagement = () => {
                   )}
                 </tbody>
               </table>
+              </div>
               
               {/* Pagination */}
               {totalPages > 0 && (
-                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                   <span className="text-sm font-medium text-slate-500">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredAdmissions.length)} of {filteredAdmissions.length} entries
                   </span>

@@ -140,13 +140,14 @@ const PharmacyReports = () => {
             <FileText size={20} className="text-primary" /> Recent Pharmacy Bills
           </h3>
           
-          <div className="overflow-x-auto custom-scrollbar w-full">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
             {(() => {
               const totalPages = Math.ceil(recentBills.length / itemsPerPage);
               const currentBills = recentBills.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
               
               return (
                 <>
+                  <div className="flex-1 overflow-auto custom-scrollbar">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
@@ -175,10 +176,11 @@ const PharmacyReports = () => {
                       )}
                     </tbody>
                   </table>
+                  </div>
                   
                   {/* Pagination */}
                   {totalPages > 0 && (
-                    <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                    <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                       <span className="text-sm font-medium text-slate-500">
                         Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, recentBills.length)} of {recentBills.length} entries
                       </span>

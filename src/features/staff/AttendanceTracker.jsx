@@ -113,53 +113,55 @@ const AttendanceTracker = () => {
           <History size={18} /> {userRole === 'admin' ? "Hospital Attendance Logs" : "My Attendance History"}
         </h3>
         
-        <div className="overflow-x-auto custom-scrollbar w-full">
+        <div className="flex-1 flex flex-col border border-slate-200 rounded-2xl bg-white/50 overflow-hidden">
           {(() => {
             const totalPages = Math.ceil(attendanceLogs.length / itemsPerPage);
             const currentLogs = attendanceLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
             
             return (
               <>
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
-                      <th className="py-3 px-4 font-medium">Date</th>
-                      {userRole === 'admin' && <th className="py-3 px-4 font-medium">Staff Name</th>}
-                      <th className="py-3 px-4 font-medium">Check-In Time</th>
-                      <th className="py-3 px-4 font-medium">Check-Out Time</th>
-                      <th className="py-3 px-4 font-medium">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceLogs.length === 0 ? (
-                      <tr>
-                        <td colSpan={userRole === 'admin' ? 5 : 4} className="text-center py-6 text-slate-500">
-                          No attendance records found.
-                        </td>
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 text-sm border-y border-slate-200">
+                        <th className="py-3 px-4 font-medium">Date</th>
+                        {userRole === 'admin' && <th className="py-3 px-4 font-medium">Staff Name</th>}
+                        <th className="py-3 px-4 font-medium">Check-In Time</th>
+                        <th className="py-3 px-4 font-medium">Check-Out Time</th>
+                        <th className="py-3 px-4 font-medium">Status</th>
                       </tr>
-                    ) : (
-                      currentLogs.map(log => (
-                        <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
-                          <td className="py-3 px-4 font-medium text-slate-700">{log.date}</td>
-                          {userRole === 'admin' && <td className="py-3 px-4">{log.staffName}</td>}
-                          <td className="py-3 px-4 text-slate-600">{log.checkInTime}</td>
-                          <td className="py-3 px-4 text-slate-600">{log.checkOutTime || '-'}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
-                              log.status === 'Present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                            }`}>
-                              {log.status}
-                            </span>
+                    </thead>
+                    <tbody>
+                      {attendanceLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={userRole === 'admin' ? 5 : 4} className="text-center py-6 text-slate-500">
+                            No attendance records found.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        currentLogs.map(log => (
+                          <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
+                            <td className="py-3 px-4 font-medium text-slate-700">{log.date}</td>
+                            {userRole === 'admin' && <td className="py-3 px-4">{log.staffName}</td>}
+                            <td className="py-3 px-4 text-slate-600">{log.checkInTime}</td>
+                            <td className="py-3 px-4 text-slate-600">{log.checkOutTime || '-'}</td>
+                            <td className="py-3 px-4">
+                              <span className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
+                                log.status === 'Present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                              }`}>
+                                {log.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
                 
                 {/* Pagination */}
                 {totalPages > 0 && (
-                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 sticky bottom-0 z-10 gap-4">
+                  <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between bg-slate-50/80 gap-4 shrink-0">
                     <span className="text-sm font-medium text-slate-500">
                       Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, attendanceLogs.length)} of {attendanceLogs.length} entries
                     </span>
