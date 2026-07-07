@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../firebase';
 import { motion } from 'framer-motion';
-import { UserPlus, Building2, User, Mail, Phone, Lock, ChevronRight, AlertCircle, CheckCircle2, Activity, HeartPulse, Stethoscope } from 'lucide-react';
+import { UserPlus, Building2, User, Mail, Phone, Lock, ChevronRight, AlertCircle, CheckCircle2, Activity, HeartPulse, Stethoscope, Eye, EyeOff } from 'lucide-react';
 
 const StaffRegistration = () => {
   const { hospitalId } = useParams();
@@ -15,6 +15,7 @@ const StaffRegistration = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [registering, setRegistering] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -276,7 +277,14 @@ const StaffRegistration = () => {
                     <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                      <input type="password" name="password" required value={formData.password} onChange={handleChange} className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white outline-none transition-all font-medium text-slate-700 tracking-widest" placeholder="••••••••" minLength="6" />
+                      <input type={showPassword ? "text" : "password"} name="password" required value={formData.password} onChange={handleChange} className={`w-full pl-12 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white outline-none transition-all font-medium text-slate-700 ${!showPassword ? 'tracking-widest' : ''}`} placeholder="••••••••" minLength="6" />
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 transition-colors focus:outline-none"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
                     </div>
                   </div>
                 </div>

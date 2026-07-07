@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { showPopup } from '../utils/popup';
 import { motion } from 'framer-motion';
-import { Building2, Clock, ShieldCheck, HeartPulse, Stethoscope, Activity } from 'lucide-react';
+import { Building2, Clock, ShieldCheck, HeartPulse, Stethoscope, Activity, Eye, EyeOff } from 'lucide-react';
 import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase';
@@ -22,6 +22,7 @@ const RegisterHospital = () => {
   });
   
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleChange = (e) => {
@@ -207,7 +208,16 @@ const RegisterHospital = () => {
                 </div>
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">Password *</label>
-                  <input required type="password" name="password" onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all font-medium text-slate-700 tracking-widest" placeholder="••••••••" />
+                  <div className="relative">
+                    <input required type={showPassword ? "text" : "password"} name="password" onChange={handleChange} className={`w-full pl-5 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all font-medium text-slate-700 ${!showPassword ? 'tracking-widest' : ''}`} placeholder="••••••••" />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 

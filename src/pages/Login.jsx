@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock, HeartPulse, ShieldCheck, Activity, Stethoscope } from 'lucide-react';
+import { Lock, HeartPulse, ShieldCheck, Activity, Stethoscope, Eye, EyeOff } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -12,6 +12,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   React.useEffect(() => {
     if (localStorage.getItem('role')) {
@@ -180,14 +181,23 @@ const Login = () => {
                 Password
                 <a href="#" className="text-xs text-primary hover:underline font-medium">Forgot Password?</a>
               </label>
-              <input 
-                required 
-                type="password" 
-                name="password" 
-                onChange={(e) => setFormData({...formData, password: e.target.value})} 
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white outline-none transition-all font-medium text-slate-700 tracking-widest" 
-                placeholder="••••••••" 
-              />
+              <div className="relative">
+                <input 
+                  required 
+                  type={showPassword ? "text" : "password"}
+                  name="password" 
+                  onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                  className={`w-full pl-5 pr-12 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white outline-none transition-all font-medium text-slate-700 ${!showPassword ? 'tracking-widest' : ''}`} 
+                  placeholder="••••••••" 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-sky-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98] mt-4 flex justify-center items-center gap-2">
