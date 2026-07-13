@@ -8,6 +8,12 @@ import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../shared/components/Modal';
 
+const calculatePrice = (count) => {
+  const numCount = Number(count) || 0;
+  if (numCount <= 0) return 0;
+  return numCount > 100 ? numCount * 350 : numCount * 500;
+};
+
 const RegisterHospital = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,7 +24,8 @@ const RegisterHospital = () => {
     address: '',
     contact: '',
     email: '',
-    password: ''
+    password: '',
+    patientCount: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -48,7 +55,9 @@ const RegisterHospital = () => {
         adminEmail: formData.email,
         createdAt: serverTimestamp(),
         status: 'pending', // SUPERADMIN APPROVAL REQUIRED
-        subscription: 'premium'
+        subscription: 'premium',
+        patientCount: Number(formData.patientCount) || 0,
+        estimatedPrice: calculatePrice(formData.patientCount)
       });
 
       // 3. Create User Profile
@@ -193,6 +202,63 @@ const RegisterHospital = () => {
                 <div className="col-span-1 md:col-span-2">
                   <label className="block text-sm font-bold text-slate-700 mb-2 ml-1">Full Address *</label>
                   <textarea required name="address" onChange={handleChange} className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all font-medium text-slate-700 min-h-[80px]" placeholder="123 Health Ave, Mumbai, India"></textarea>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-2 ml-1"> Patients Count*</label>
+                  <input 
+                    required 
+                    type="number" 
+                    name="patientCount" 
+                    min="1"
+                    value={formData.patientCount}
+                    onChange={handleChange} 
+                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white outline-none transition-all font-medium text-slate-700" 
+                    placeholder="e.g. 150" 
+                  />
+                </div>
+
+                <div className="col-span-1 md:col-span-2 bg-gradient-to-br from-indigo-50 to-sky-50 border border-indigo-100 rounded-2xl p-6">
+                  <h4 className="font-bold text-indigo-950 mb-3 flex items-center gap-2">
+                    <Activity className="text-indigo-600" size={20} />
+                    Pricing & Monthly Estimate
+                  </h4>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                    <div className="bg-white/80 backdrop-blur-sm border border-slate-100 rounded-xl p-4 shadow-sm">
+                      <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Standard Rate (≤ 100 Patients)</span>
+                      <span className="text-lg font-bold text-slate-800">₹500 <span className="text-sm font-medium text-slate-500">/ patient</span></span>
+                    </div>
+                    <div className="bg-white/80 backdrop-blur-sm border border-indigo-100 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg">Volume Discount</div>
+                      <span className="block text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Enterprise Rate (&gt; 100 Patients)</span>
+                      <span className="text-lg font-bold text-indigo-950">₹350 <span className="text-sm font-medium text-slate-500">/ patient</span></span>
+                    </div>
+                  </div>
+
+                  {formData.patientCount && Number(formData.patientCount) > 0 ? (
+                    <div className="border-t border-indigo-100 pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div>
+                        <span className="text-sm text-indigo-950 font-medium">Applied Rate: </span>
+                        <span className="font-semibold text-indigo-700">
+                          ₹{Number(formData.patientCount) > 100 ? '350' : '500'} per patient
+                        </span>
+                        <span className="text-xs text-slate-500 block mt-0.5">
+                          Calculation: {formData.patientCount} × ₹{Number(formData.patientCount) > 100 ? '350' : '500'}
+                        </span>
+                      </div>
+                      <div className="text-left sm:text-right">
+                        <span className="text-xs text-slate-500 block font-semibold uppercase tracking-wider">Estimated Monthly Total</span>
+                        <span className="text-2xl font-extrabold text-indigo-600">
+                          ₹{calculatePrice(formData.patientCount).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-t border-indigo-100 pt-4 text-sm text-slate-500 italic">
+                      Enter estimated monthly patients above to calculate your pricing estimate.
+                    </div>
+                  )}
                 </div>
 
                 <div className="col-span-1 md:col-span-2 mt-4">

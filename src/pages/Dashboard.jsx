@@ -647,6 +647,16 @@ const Dashboard = () => {
                       <div>
                         <h3 className="font-bold text-lg text-slate-800">{hosp.hospitalName}</h3>
                         <p className="text-sm text-slate-500">Chief Doctor: {hosp.chiefDoctorName} | Admin: {hosp.adminEmail}</p>
+                        {hosp.patientCount !== undefined && (
+                          <div className="flex flex-wrap gap-3 mt-2 text-xs font-semibold">
+                            <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">
+                              Patients: {hosp.patientCount} / month
+                            </span>
+                            <span className="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md">
+                              Est. Pricing: ₹{(hosp.estimatedPrice || 0).toLocaleString('en-IN')}/month
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <button onClick={() => handleApprove(hosp.id)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl font-medium shadow-sm">
                         Approve Workspace
