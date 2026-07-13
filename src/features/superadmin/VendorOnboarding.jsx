@@ -116,17 +116,29 @@ const VendorOnboarding = () => {
                   <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Created At</p>
                   <p className="text-slate-800 font-medium flex items-center gap-1">
                     <Calendar size={14} className="text-slate-400"/>
-                    {new Date(hosp.createdAt?.toDate()).toLocaleDateString() || 'N/A'}
+                    {hosp.createdAt?.toDate ? new Date(hosp.createdAt.toDate()).toLocaleDateString() : hosp.createdAt ? new Date(hosp.createdAt).toLocaleDateString() : 'N/A'}
                   </p>
                 </div>
+                {hosp.patientCount !== undefined && (
+                  <>
+                    <div>
+                      <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Est. Patients / Month</p>
+                      <p className="text-slate-800 font-bold">{hosp.patientCount}</p>
+                    </div>
+                    <div>
+                      <p className="text-indigo-600 text-xs font-bold uppercase tracking-wider mb-1">Est. Monthly Pricing</p>
+                      <p className="text-indigo-700 font-extrabold text-base">₹{(hosp.estimatedPrice || 0).toLocaleString('en-IN')}</p>
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 pt-2 border-t border-slate-100">
                 <p className="text-sm flex items-center gap-2 text-slate-600">
                   <Mail size={16} className="text-slate-400"/> {hosp.adminEmail}
                 </p>
                 <p className="text-sm flex items-center gap-2 text-slate-600">
-                  <Phone size={16} className="text-slate-400"/> {hosp.phone || 'Not Provided'}
+                  <Phone size={16} className="text-slate-400"/> {hosp.phone || hosp.contact || 'Not Provided'}
                 </p>
               </div>
             </div>
