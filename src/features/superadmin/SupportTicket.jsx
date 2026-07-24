@@ -10,6 +10,14 @@ const SupportTicket = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [reply, setReply] = useState('');
 
+  // New ticket state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newSubject, setNewSubject] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [newHospital, setNewHospital] = useState('Central Clinic');
+  const [newPriority, setNewPriority] = useState('medium');
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     // In a real app we'd sort by createdAt. Mocking simple query for now.
     const q = query(collection(db, 'support_tickets'));
@@ -26,6 +34,46 @@ const SupportTicket = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleCreateTicket = async (e) => {
+    e.preventDefault();
+    if (!newSubject.trim() || !newDesc.trim()) return;
+    setSubmitting(true);
+    try {
+      const ticketPayload = {
+        productId: 'clinic-management',
+        productName: 'Clinic Management System',
+        hospitalName: newHospital,
+        clientName: newHospital,
+        subject: newSubject.trim(),
+        description: newDesc.trim(),
+        priority: newPriority,
+        status: 'open',
+        createdAt: new Date().toISOString(),
+        messages: [{
+          sender: 'Client',
+          author: newHospital,
+          text: newDesc.trim(),
+          timestamp: new Date().toISOString()
+        }]
+      };
+
+      await addDoc(collection(db, 'support_tickets'), ticketPayload);
+      try {
+        await addDoc(collection(db, 'tickets'), ticketPayload);
+      } catch (err) {}
+
+      setNewSubject('');
+      setNewDesc('');
+      setShowCreateModal(false);
+      alert('✓ Support ticket submitted to Zuna Admin Panel!');
+    } catch (err) {
+      console.error('Failed raising ticket:', err);
+      alert('Failed to submit support ticket.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -58,7 +106,7 @@ const SupportTicket = () => {
       setSelectedTicket(prev => ({ ...prev, messages: updatedMessages, status: 'in-progress' }));
       setReply('');
     } catch (error) {
-      console.error("Error sending reply:", error);
+      console.error("Error replying to ticket:", error);
     }
   };
 
